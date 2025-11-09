@@ -46,28 +46,37 @@ it works!
 
 
 @app.get("/album/<int:item_id>/info")
-def get_album_info(item_id: int):
-    # 客户端
-    client = JmOption.default().new_jm_client(impl="html")
-    # 本子实体类
-    album: JmAlbumDetail = client.get_album_detail(item_id)
+def get_album_info(item_id: int, impl="html"):
+    try:
+        a = JmOption.default()
+        if a.client.postman.get('cookies') is None:
+            a.client.postman['cookies'] = {}  # 确保cookies字段存在
+        a.client.postman['cookies']['AVS'] = "1e4m8ifti47229fp476kinhacl716"
+        # 客户端
+        client = a.new_jm_client(impl=impl)
+        # 本子实体类
+        album: JmAlbumDetail = client.get_album_detail(item_id)
 
-    return jsonify(
-        {
-            "item_id": item_id,
-            "name": album.name,
-            "actors": album.actors,
-            "page_count": album.page_count,
-            "tags": album.tags,
-            "authors": album.authors,
-            "pub_date": album.pub_date,
-            "description": album.description,
-            "views": album.views,
-            "update_date": album.update_date,
-            "likes": album.likes,
-            "comment_count": album.comment_count,
-        }
-    )
+        return jsonify(
+            {
+                "item_id": item_id,
+                "name": album.name,
+                "actors": album.actors,
+                "page_count": album.page_count,
+                "tags": album.tags,
+                "authors": album.authors,
+                "pub_date": album.pub_date,
+                "description": album.description,
+                "views": album.views,
+                "update_date": album.update_date,
+                "likes": album.likes,
+                "comment_count": album.comment_count,
+            }
+        )
+    except Exception as e:
+        if str(e).find("只对登录用户可见") != -1:
+            return get_album_info(item_id, impl="api")
+        return jsonify({"code": 500, "message": str(e)}), 500
 
 
 @app.get("/photo/<int:item_id>")
