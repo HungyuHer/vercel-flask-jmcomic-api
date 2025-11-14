@@ -46,11 +46,12 @@ it works!
 
 
 @app.get("/album/<int:item_id>/info")
-def get_album_info(item_id: int, impl="html"):
+def get_album_info(item_id: int, impl="html", url=["18comic.vip"]):
     try:
         a = JmOption.construct(
             {
                 "client": {
+                    "domain": url,
                     "impl": impl,
                 },
                 "plugins": {
@@ -67,7 +68,7 @@ def get_album_info(item_id: int, impl="html"):
             }
         )
         # 随时获取最新AVS
-        a.call_all_plugin("after_init")
+        # a.call_all_plugin("after_init")
         # 客户端
         client = a.new_jm_client(impl=impl)
         # 本子实体类
@@ -92,10 +93,10 @@ def get_album_info(item_id: int, impl="html"):
     except Exception as e:
         if str(e).find("只对登录用户可见") != -1:
             print("只对登录用户可见", str(e))
-            return get_album_info(item_id, impl="api")
+            return get_album_info(item_id, impl="api", url=[])
         if str(e).find("请求重试全部失败") != -1:
             print("请求重试全部失败", str(e))
-            return get_album_info(item_id)
+            return get_album_info(item_id, url=[])
         return jsonify({"code": 500, "message": str(e)}), 500
 
 
