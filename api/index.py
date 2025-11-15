@@ -91,7 +91,7 @@ def get_album_info(item_id: int, impl="html", url=["18comic.vip"]):
             }
         )
     except Exception as e:
-        if str(e).find("只对登录用户可见") != -1:
+        if str(e).find("只对登录用户可见") != -1 and impl != "api":
             print("只对登录用户可见", str(e))
             return get_album_info(item_id, impl="api", url=[])
         if str(e).find("请求重试全部失败") != -1:
