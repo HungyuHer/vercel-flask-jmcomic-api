@@ -1,5 +1,5 @@
 from io import BytesIO
-from flask import Flask, Response, jsonify
+from flask import Flask, Response, jsonify, request
 from jmcomic import *
 
 app = Flask(__name__)
@@ -43,6 +43,91 @@ def read_root():
     return """
 it works!
     """
+
+
+@app.get("/album/<int:item_id>/cover")
+def get_album_cover(item_id: int):
+    """返回封面响应"""
+    try:
+        a = JmOption.default().new_jm_client()
+
+        a.download_album_cover(item_id, "./cover.webp", "_3x4")
+
+        # 检查是否捕获到图片
+        if not captured_images:
+            return jsonify({"code": 404, "message": "No image captured"}), 404
+
+        print(captured_images)
+
+        # 获取第一个捕获的图片
+        image = next(iter(captured_images.values()))
+        captured_images.clear()  # 清空捕获的图片
+
+        # ========== 图片压缩和尺寸限制 ==========
+        # 获取原始尺寸
+        original_width, original_height = image.size
+        print(f"原始图片尺寸: {original_width}x{original_height}")
+
+        # 设置最大宽度
+        width = request.args.get('w')
+        max_width = int(width) if width and width.isdigit() else 600
+
+        if original_width > max_width:
+            # 计算等比例缩放后的高度
+            new_height = int((max_width / original_width) * original_height)
+            # 使用高质量的重采样算法
+            image = image.resize((max_width, new_height), Image.Resampling.LANCZOS)
+            print(f"压缩后尺寸: {max_width}x{new_height}")
+        else:
+            print(f"图片宽度 {original_width}px 已小于限制 {max_width}px，无需压缩")
+
+        # 进一步优化图片质量和大小
+        optimize_options = {
+            "quality": 50,  # 降低质量到50%
+            "optimize": True,  # 启用优化
+            "progressive": True,  # 启用渐进式JPEG（对大图加载友好）
+        }
+
+        # 如果是PNG或WEBP格式，转换为JPEG以进一步减小体积
+        if image.mode in ["RGBA", "P"]:
+            # 创建白色背景
+            background = Image.new("RGB", image.size, (255, 255, 255))
+            # 如果有透明通道，将图片粘贴到白色背景上
+            if image.mode == "RGBA":
+                background.paste(image, mask=image.split()[-1])  # 使用alpha通道作为mask
+            else:
+                background.paste(image)
+            image = background
+        elif image.mode != "RGB":
+            image = image.convert("RGB")
+
+        # 将PIL.Image转换为字节流
+        img_io = BytesIO()
+
+        # 保存为JPEG格式到内存（应用压缩设置）
+        image.save(img_io, "JPEG", **optimize_options)
+
+        # 获取压缩后的大小
+        compressed_size = img_io.tell()
+        img_io.seek(0)
+
+        print(f"压缩后文件大小: {compressed_size / 1024:.1f} KB")
+
+        # 返回图片响应
+        return Response(
+            img_io.getvalue(),
+            mimetype="image/jpeg",
+            headers={
+                "Content-Disposition": "inline",
+                "Cache-Control": "public, max-age=3600",
+                "X-Image-Original-Size": f"{original_width}x{original_height}",
+                "X-Image-Compressed-Size": f"{image.size[0]}x{image.size[1]}",
+                "X-Image-File-Size": str(compressed_size),
+            },
+        )
+
+    except Exception as e:
+        return jsonify({"code": 500, "message": str(e)}), 500
 
 
 @app.get("/album/<int:item_id>/info")
