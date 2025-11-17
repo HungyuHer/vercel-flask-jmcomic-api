@@ -70,7 +70,7 @@ def get_album_cover(item_id: int):
 
         # 设置最大宽度
         width = request.args.get('w')
-        max_width = int(width) if width and width.isdigit() else 600
+        max_width = int(width) if width and width.isdigit() else 100
 
         if original_width > max_width:
             # 计算等比例缩放后的高度
