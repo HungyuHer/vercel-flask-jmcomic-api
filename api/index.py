@@ -221,7 +221,7 @@ def get_image(item_id: int, page: int = 1):
         print(f"原始图片尺寸: {original_width}x{original_height}")
 
         # 设置最大宽度
-        max_width = 600
+        max_width = 500
 
         if original_width > max_width:
             # 计算等比例缩放后的高度
