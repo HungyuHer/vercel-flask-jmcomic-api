@@ -218,8 +218,8 @@ def get_search(value, client_page=1):
     except Exception as e:
         return jsonify({"code": 500, "message": str(e)}), 500
 
-
-@app.get("/album/<int:item_id>/info")
+@app.get("/album/<int:item_id>")
+@app.get("/album/<int:item_id>/")
 def get_album_info(item_id: int, impl="html", url=["18comic.vip"]):
     try:
         a = JmOption.construct(
@@ -380,7 +380,7 @@ def config():
                 "name": "JMComic",
                 "apiUrl": "https://jmcomic.yzf.moe",
                 "searchPath": "/search/<text>/<page>",
-                "detailPath": "/album/<id>/info",
+                "detailPath": "/album/<id>",
                 "photoPath": "/photo/<id>/<page>",
                 "coverPath": "/album/<id>/cover",
                 "type": "jmcomic",
