@@ -71,7 +71,7 @@ vercel
 
 #### 获取本子信息
 ```
-GET /album/<comic_id>/info
+GET /album/<comic_id>
 ```
 参数:
 - `comic_id`: 本子ID
