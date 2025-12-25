@@ -226,6 +226,7 @@ def get_album_info(item_id: int, impl="html", url=["18comic.vip"]):
             {
                 "client": {
                     "impl": impl,
+                    "domain": url,
                 },
                 "plugins": {
                     "after_init": [
