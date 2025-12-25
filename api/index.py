@@ -377,7 +377,7 @@ def config():
         {
             "JMComic": {
                 "name": "JMComic",
-                "apiUrl": request.host_url,
+                "apiUrl": request.host_url.rsplit("/", 1)[0],
                 "searchPath": "/search/<text>/<page>",
                 "detailPath": "/album/<id>",
                 "photoPath": "/photo/<id>/<page>",
