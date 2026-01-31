@@ -233,8 +233,8 @@ def get_album_info(item_id: int, impl="html", url=["18comic.vip"]):
                         {
                             "plugin": "login",
                             "kwargs": {
-                                "username": "test19195456546",
-                                "password": "test19195456546",
+                                "username": "dianjiao123456",
+                                "password": "hhy123456",
                             },
                         }
                     ]
